@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.cxx }} / ${{ matrix.build_type }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cxx: [g++, clang++]
+        build_type: [Release, Debug]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
+      - name: Build
+        run: cmake --build build -j
+      - name: Unit tests
+        run: ctest --test-dir build --output-on-failure
+      - name: Smoke-run the tools
+        if: matrix.build_type == 'Release'
+        run: |
+          ./build/qc replay data/sample_orders.csv --quiet --out-dir out
+          diff out/trades.csv data/expected/sample_trades.csv
+          ./build/qc sim --seconds 3 > /dev/null
+          ./build/qc_bench book --ops 200000
+
+  sanitizers:
+    name: sanitizer / ${{ matrix.sanitizer }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address, thread]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo -DQC_SANITIZE=${{ matrix.sanitizer }}
+      - name: Build tests
+        run: cmake --build build -j --target qc_tests
+      - name: Run tests under sanitizer
+        run: ./build/qc_tests
