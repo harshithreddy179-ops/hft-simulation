@@ -37,7 +37,8 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
 ## Questions you should expect (and honest answers)
 
 **Why C++?** Predictable latency and layout control matter for the low-latency theme; no GC pauses,
-no allocation on the hot path. The architecture and test strategy are language-independent.
+no per-order allocation inside the order book (new price levels and the risk table still allocate —
+say so if asked). The architecture and test strategy are language-independent.
 
 **Why not lock the book and use many threads?** Measured: two threads on one mutex are ~4× *slower*
 than one thread (1.99 → 0.51 M/s); sharding by symbol with SPSC queues reached 4.1 M/s on four cores.

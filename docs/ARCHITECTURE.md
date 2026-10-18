@@ -67,7 +67,11 @@ index and form an intrusive FIFO list per level; each order keeps a pointer to i
 (`std::map` nodes are stable), so **cancel is one hash lookup plus pointer surgery** — it never walks a
 list or searches for the level (only erasing a level that just became empty costs O(log levels)). The id→slot index is a custom open-addressing table (`FlatIdMap`,
 Fibonacci hashing, linear probing, backward-shift deletion so there are no tombstones). After
-warm-up the hot path allocates nothing. The usual next optimisation is a flat array indexed by price
+warm-up the *book* does no per-order allocation (orders are recycled from the pool and the id table
+only grows to its high-water mark), but it is not allocation-free: creating a new price level
+allocates a `std::map` node, and the risk engine's tracked-order table is a `std::unordered_map`
+that allocates per tracked order, so the full `Exchange` path still allocates. Removing those is
+future work (a flat price ladder and a pooled risk table). The usual next optimisation is a flat array indexed by price
 tick instead of the tree; it needs a bounded price range, so it was left out (and not measured).
 
 ## 3. Risk
