@@ -1,0 +1,7 @@
+ts_ns,symbol,trade_id,price,qty,aggressor,maker_order,taker_order,maker_client,taker_client
+5000,AAPL,1,150.10,100,BUY,1,5,10,14
+5000,AAPL,2,150.10,20,BUY,2,5,11,14
+6000,AAPL,3,150.10,30,BUY,2,6,11,13
+6000,AAPL,4,150.20,120,BUY,3,6,12,13
+12000,AAPL,5,150.20,40,BUY,3,10,12,16
+18000,MSFT,1,300.00,10,BUY,13,14,10,11
